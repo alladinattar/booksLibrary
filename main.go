@@ -2,7 +2,11 @@ package main
 
 import (
 	"context"
+	"database/sql"
+	"github.com/gorilla/mux"
 	"github.com/libraryGo/handlers"
+	"github.com/libraryGo/repositories"
+	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
 	"os"
@@ -12,13 +16,20 @@ import (
 
 func main() {
 	l := log.New(os.Stdout, "library", log.LstdFlags)
-	gbHandler := handlers.NewGetBook(l)
-	mux := http.NewServeMux()
-	mux.Handle("/getBook", gbHandler)
+	db, err := sql.Open("sqlite3", "db/books.db")
+	if err!=nil{
+		l.Fatal(err)
+	}
+	repo := repositories.NewBookRepo(db)
+
+	booksHandler := handlers.NewBookHandler(l,repo)
+
+	r := mux.NewRouter()
+	r.Handle("/books/{id:[0-9]+}", booksHandler).Methods("GET")
 
 	s := http.Server{
-		Addr:         ":8080",
-		Handler:      mux,
+		Addr:         ":9000",
+		Handler:      r,
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
