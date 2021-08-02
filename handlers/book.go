@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/libraryGo/models"
 	"log"
@@ -9,26 +9,37 @@ import (
 	"strconv"
 )
 
-type BooksHandler struct {
-	l *log.Logger
+type BookHandler struct {
+	l    *log.Logger
 	repo models.DataProcesser
 }
 
-func NewBookHandler(l *log.Logger, repository models.DataProcesser) *BooksHandler {
-	return &BooksHandler{l, repository}
+func NewBookHandler(l *log.Logger, repository models.DataProcesser) *BookHandler {
+	return &BookHandler{l, repository}
 }
 
-func (b *BooksHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (b *BookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
-	if err!=nil{
+	if err != nil {
 		w.WriteHeader(404)
+		b.l.Println("convert error")
 	}
+
+	b.l.Println("find by id")
 	book, err := b.repo.FindByID(id)
-	if err!=nil{
-		b.l.Fatal(err)
+	if err != nil {
+		b.l.Println(err)
+		w.WriteHeader(400)
 	}
-	fmt.Fprintf(w, "It's your book", book.Title)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+
+	err = json.NewEncoder(w).Encode(book)
+	if err!=nil{
+		w.WriteHeader(400)
+		b.l.Println("cannot encode data")
+	}
 }
-
-

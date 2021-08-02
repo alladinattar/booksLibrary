@@ -3,6 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"github.com/libraryGo/models"
+	"strconv"
 )
 
 type BookRepo struct {
@@ -18,28 +19,39 @@ func NewBookRepo(db *sql.DB) *BookRepo {
 
 func (r *BookRepo) FindByID(ID int) (*models.Book, error) {
 	//request to db realization
-	rows, err := r.db.Query("SELECT * FROM books WHERE ID = " + string(ID))
+	rows, err := r.db.Query("SELECT * FROM books WHERE ID = " + strconv.Itoa(ID))
 	if err != nil {
 		return nil, err
 	}
-	var id int
-	var authors string
-	var title string
-
+	book := models.Book{}
 	for rows.Next() {
-		err = rows.Scan(&id, &authors, &title)
+		err = rows.Scan(&book.ID, &book.Author, &book.Title)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	err = rows.Close() //good habit to close
+	err = rows.Close()
 	if err != nil {
-		return &models.Book{
-			ID:     id,
-			Title:  authors,
-			Author: title,
-		}, err
+		return &book, err
 	}
-	return &models.Book{}, nil
+	return &book, nil
+}
+
+func (r *BookRepo) GetBooks() ([]*models.Book, error){
+	books := []*models.Book{}
+
+	rows, err := r.db.Query("SELECT bookID, title, authors FROM books")
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next(){
+		book := models.Book{}
+		err = rows.Scan(&book.ID, &book.Author, &book.Title)
+		if err!=nil{
+			return []*models.Book{}, err
+		}
+		books = append(books, &book)
+	}
+	return books, nil
 }

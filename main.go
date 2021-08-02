@@ -15,17 +15,19 @@ import (
 )
 
 func main() {
-	l := log.New(os.Stdout, "library", log.LstdFlags)
+	l := log.New(os.Stdout, "", log.LstdFlags)
 	db, err := sql.Open("sqlite3", "db/books.db")
 	if err!=nil{
 		l.Fatal(err)
 	}
 	repo := repositories.NewBookRepo(db)
 
-	booksHandler := handlers.NewBookHandler(l,repo)
-
+	bookHandler := handlers.NewBookHandler(l,repo)
+	booksHandler := handlers.NewBooksHandler(l, repo)
 	r := mux.NewRouter()
-	r.Handle("/books/{id:[0-9]+}", booksHandler).Methods("GET")
+	r.Handle("/books/{id:[0-9]+}", bookHandler).Methods("GET")
+
+	r.Handle("/books", booksHandler).Methods("GET")
 
 	s := http.Server{
 		Addr:         ":9000",
