@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/libraryGo/models"
 	"strconv"
 )
@@ -19,8 +20,9 @@ func NewBookRepo(db *sql.DB) *BookRepo {
 
 func (r *BookRepo) FindByID(ID int) (*models.Book, error) {
 	//request to db realization
-	rows, err := r.db.Query("SELECT * FROM books WHERE ID = " + strconv.Itoa(ID))
+	rows, err := r.db.Query("SELECT bookID, title, authors FROM books WHERE bookID = " + strconv.Itoa(ID))
 	if err != nil {
+		fmt.Println("fsd")
 		return nil, err
 	}
 	book := models.Book{}
@@ -38,20 +40,33 @@ func (r *BookRepo) FindByID(ID int) (*models.Book, error) {
 	return &book, nil
 }
 
-func (r *BookRepo) GetBooks() ([]*models.Book, error){
+func (r *BookRepo) GetBooks() ([]*models.Book, error) {
 	books := []*models.Book{}
 
 	rows, err := r.db.Query("SELECT bookID, title, authors FROM books")
 	if err != nil {
 		return nil, err
 	}
-	for rows.Next(){
+	for rows.Next() {
 		book := models.Book{}
 		err = rows.Scan(&book.ID, &book.Author, &book.Title)
-		if err!=nil{
+		if err != nil {
 			return []*models.Book{}, err
 		}
 		books = append(books, &book)
 	}
 	return books, nil
+}
+
+func (r *BookRepo) AddBook(book *models.Book) error {
+	stmt, err := r.db.Prepare("INSERT INTO books(title, authors) values(?,?)")
+	if err!=nil{
+		return err
+	}
+	result, err := stmt.Exec(book.Title, book.Author)
+	if err!=nil{
+		return err
+	}
+	fmt.Print(result.RowsAffected())
+	return nil
 }
