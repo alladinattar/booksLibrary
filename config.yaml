@@ -1,0 +1,4 @@
+server:
+  port: ":9000"
+database:
+  path: "./db/books.db"

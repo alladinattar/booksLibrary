@@ -1,16 +1,15 @@
 package models
 
-type Book struct{
-	ID int `json:"id"`
-	Title string `json:"title"`
+type Book struct {
+	ID     int    `json:"id"`
+	Title  string `json:"title"`
 	Author string `json:"authors"`
 }
 
-type DataProcesser interface {
+type BooksRepository interface {
+	FindByAuthor(Author string) ([]*Book, error)
 	FindByID(ID int) (*Book, error)
-	GetBooks()([]*Book, error)
-	AddBook(*Book)(error)
+	Fetch() ([]*Book, error)
+	Add(*Book) error
 }
-//bookID,title,authors,average_rating,isbn,isbn13,language_code,  num_pages,ratings_count,text_reviews_count,publication_date,publisher
-
 
