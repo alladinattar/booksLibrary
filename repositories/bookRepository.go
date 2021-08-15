@@ -7,18 +7,18 @@ import (
 	"strconv"
 )
 
-type BookRepo struct {
+type BookRepository struct {
 	db *sql.DB
 }
 
-func NewBookRepo(db *sql.DB) *BookRepo {
-	return &BookRepo{
+func NewBookRepository(db *sql.DB) *BookRepository {
+	return &BookRepository{
 		db: db,
 	}
 
 }
 
-func (r *BookRepo) FindByID(ID int) (*models.Book, error) {
+func (r *BookRepository) FindByID(ID int) (*models.Book, error) {
 	//request to db realization
 	rows, err := r.db.Query("SELECT bookID, title, authors FROM books WHERE bookID = " + strconv.Itoa(ID))
 	if err != nil {
@@ -40,9 +40,8 @@ func (r *BookRepo) FindByID(ID int) (*models.Book, error) {
 	return &book, nil
 }
 
-func (r *BookRepo) GetBooks() ([]*models.Book, error) {
+func (r *BookRepository) Fetch() ([]*models.Book, error) {
 	books := []*models.Book{}
-
 	rows, err := r.db.Query("SELECT bookID, title, authors FROM books")
 	if err != nil {
 		return nil, err
@@ -58,7 +57,7 @@ func (r *BookRepo) GetBooks() ([]*models.Book, error) {
 	return books, nil
 }
 
-func (r *BookRepo) AddBook(book *models.Book) error {
+func (r *BookRepository) AddBook(book *models.Book) error {
 	stmt, err := r.db.Prepare("INSERT INTO books(title, authors) values(?,?)")
 	if err!=nil{
 		return err
