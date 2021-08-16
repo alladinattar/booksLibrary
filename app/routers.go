@@ -34,4 +34,5 @@ func Setup(app *fiber.App, env *Env) {
 	books := app.Group("/books")
 	books.Get("/", booksHandler.GetBooks)
 
+
 }
