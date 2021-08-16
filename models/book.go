@@ -8,7 +8,6 @@ type Book struct {
 
 type BooksRepository interface {
 	FindByAuthor(Author string) ([]*Book, error)
-	FindByID(ID int) (*Book, error)
 	Fetch() ([]*Book, error)
 	Add(*Book) error
 }

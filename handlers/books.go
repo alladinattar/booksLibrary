@@ -15,12 +15,21 @@ func NewBooksHandler(repository *repositories.BookRepository)*BooksHandler {
 
 
 func (h *BooksHandler) GetBooks(ctx *fiber.Ctx) error {
+	if ctx.FormValue("author") != ""{
+		books, err := h.BooksRepository.FindByAuthor(ctx.FormValue("author"))
+		if err!=nil{
+			return err
+		}
+		ctx.JSON(books)
+		return nil
+	}
 	books, err := h.BooksRepository.Fetch()
 	if err != nil {
 		return err
 	}
 	return ctx.JSON(books)
 }
+
 
 
 
